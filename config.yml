@@ -1,0 +1,33 @@
+server:
+  rootURL: "127.0.0.1"
+  host: "0.0.0.0"
+  port: "3535"
+  shutdownTimeout: 15000
+  timeout:
+    server: 70
+    read: 60
+    write: 60
+    idle: 10
+
+swagger:
+  host: "localhost:3535"
+
+app:
+  name: "passport-local"
+  version: "0.0.0"
+  privKeyPath: "private.pem"
+  pubKeyPath: "public.pem"
+
+sentry:
+  dsn: "https://45e6235460bb74b3ede2890f9f157541@o4505804081397760.ingest.sentry.io/4505804083625984"
+
+mongo:
+  url: "mongodb://localhost:27017"
+  dbname: "passport"
+  username: "citizix"
+  password: "S3cret"
+
+mail:
+  senderEmail: "bracer@abv.bg"
+  apikey: "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"
+  partnerKey: ""
