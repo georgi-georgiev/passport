@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 func NewHTTPServer(lc fx.Lifecycle, conf *Config, log *zap.Logger, app *gin.Engine) *http.Server {
@@ -30,7 +31,12 @@ func NewHTTPServer(lc fx.Lifecycle, conf *Config, log *zap.Logger, app *gin.Engi
 				return err
 			}
 			log.Info("Starting HTTP server at", zap.String("address", server.Addr))
-			go server.Serve(ln)
+			errs, _ := errgroup.WithContext(ctx)
+
+			errs.Go(func() error {
+				return server.Serve(ln)
+			})
+
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

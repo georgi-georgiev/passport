@@ -45,7 +45,11 @@ func (s *NotificationService) Listener() {
 
 				now := time.Now().UTC()
 
-				s.repository.UpdateById(context.Background(), notification.ID, bson.M{"isSent": true, "sentOn": now})
+				err = s.repository.UpdateById(context.Background(), notification.ID, bson.M{"isSent": true, "sentOn": now})
+				if err != nil {
+					s.log.Error("could not update notification")
+					return
+				}
 			}
 
 			time.Sleep(5 * time.Second)

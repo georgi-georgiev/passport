@@ -470,7 +470,11 @@ func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 		return
 	}
 
-	s.repository.SetRecoveryCode(ctx, u.ID, hashedCode)
+	err = s.repository.SetRecoveryCode(ctx, u.ID, hashedCode)
+	if err != nil {
+		s.log.Error("could not set recovery code")
+		return
+	}
 }
 
 // ExchangeRecoveryCode exchanges recovery code for a password resetting one

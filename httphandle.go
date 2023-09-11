@@ -26,17 +26,22 @@ func fmtDuration(d time.Duration) string {
 	return fmt.Sprintf("%d days, %02d:%02d:%02dh", days, h, m, s)
 }
 
-// generic healthcheck handler with running time printing
 func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, err := w.Write([]byte("OK"))
+	if err != nil {
+		panic(err)
+	}
 }
 
 // healthcheck handler with custom callback for printing service specific additional info
 func HandleHealthCheckWithCallback(healthCallback func() string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		w.Write([]byte(healthCallback()))
+		_, err := w.Write([]byte(healthCallback()))
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -63,7 +68,10 @@ func HandleRuntimeStats(w http.ResponseWriter, r *http.Request) {
 	s += fmt.Sprintf("Stack: %sMB\n", formatMBs(m.StackInuse))
 	s += fmt.Sprintf("Total runtime reserved virtual space: %sMB\n", formatMBs(m.Sys))
 
-	w.Write([]byte(s))
+	_, err := w.Write([]byte(s))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func formatMBs(n uint64) string {
