@@ -1,7 +1,7 @@
 package passport
 
 import (
-	"passport/docs"
+	"github.com/georgi-georgiev/passport/docs"
 
 	"github.com/georgi-georgiev/blunder"
 	"github.com/getsentry/sentry-go"

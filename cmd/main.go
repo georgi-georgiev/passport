@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"net/http"
-	"passport"
+
+	"github.com/georgi-georgiev/passport"
 
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/fx"

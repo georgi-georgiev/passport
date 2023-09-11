@@ -1,4 +1,4 @@
-module passport
+module github.com/georgi-georgiev/passport
 
 go 1.20
 
