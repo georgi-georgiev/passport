@@ -1,7 +1,7 @@
 FROM golang:1.20 as builder
 WORKDIR "/builder"
 COPY . ./
-RUN CGO_ENABLED=1 GOOS=linux go build -o appp ./
+RUN CGO_ENABLED=1 GOOS=linux go build -o appp ./cmd
 
 FROM debian:stable-slim
 

@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  passport:
+    container_name: "passport"
+    image: ${DOCKER_REGISTRY-}passport
+    ports:
+      - "3535:3535"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - my-proxy-net
+    env_file:
+        - .env
+
+networks:
+  my-proxy-net:
+    external:
+      name: custom_network  
+      
