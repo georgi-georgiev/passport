@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/georgi-georgiev/blunder"
 	"github.com/georgi-georgiev/passport"
 
 	_ "go.uber.org/automaxprocs"
@@ -29,7 +30,7 @@ func main() {
 			passport.NewConfig,
 			passport.NewSentry,
 			passport.NewLogger,
-			passport.NewBlunder,
+			blunder.NewRFC,
 			passport.NewGinEngine,
 			passport.NewMongoClient,
 
