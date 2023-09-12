@@ -22,10 +22,10 @@ sentry:
   dsn: "https://45e6235460bb74b3ede2890f9f157541@o4505804081397760.ingest.sentry.io/4505804083625984"
 
 mongo:
-  url: "mongodb://localhost:27017"
+  url: "mongodb://host.docker.internal:27017"
   dbname: "passport"
-  username: "citizix"
-  password: "S3cret"
+  username: "root"
+  password: "secret"
 
 mail:
   senderEmail: "bracer@abv.bg"

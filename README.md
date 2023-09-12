@@ -1,3 +1,12 @@
+# start
+`docker compose -f "docker-compose.yaml" up -d --build `
+`go run cmd/main.go`
+
+# integrate
+
+use the public code to start up the service as part of your api
+use docker image
+
 # passport
 
 [![GoDoc][doc-img]][doc] [![Build][ci-img]][ci] [![GoReport][report-img]][report] [![Coverage Status][cov-img]][cov]
@@ -5,6 +14,14 @@
 Package `passport` is an identity access management api.
 
 `go get github.com/georgi-georgiev/passport`
+
+# database
+
+create mongodb database `passport`
+
+# docker
+pull `docker pull bracer/passport`
+run `docker run bracer/passport`
 
 ## Contributing
 

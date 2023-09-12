@@ -1,7 +1,19 @@
 version: '3.9'
 
 services:
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+
   passport:
+    depends_on:
+      - mongodb
     container_name: "passport"
     image: ${DOCKER_REGISTRY-}passport
     ports:
@@ -9,13 +21,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    networks:
-      - my-proxy-net
     env_file:
         - .env
-
-networks:
-  my-proxy-net:
-    external:
-      name: custom_network  
-      
