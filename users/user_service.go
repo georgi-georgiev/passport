@@ -1,4 +1,4 @@
-package passport
+package users
 
 import (
 	"context"
@@ -9,6 +9,10 @@ import (
 
 	"time"
 
+	"github.com/georgi-georgiev/passport"
+	"github.com/georgi-georgiev/passport/notifications"
+	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/responses"
 	"github.com/golang-jwt/jwt"
 	"github.com/rotisserie/eris"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,11 +21,11 @@ import (
 )
 
 type UserService struct {
-	notificationFacade *NotificationFacade
+	notificationFacade *notifications.NotificationFacade
 	repository         *UserRepository
-	roleService        *RoleService
-	rightService       *RightService
-	conf               *Config
+	roleService        *permissions.RoleService
+	rightService       *permissions.RightService
+	conf               *passport.Config
 	log                *zap.Logger
 }
 
@@ -31,7 +35,7 @@ type UserClaims struct {
 	Rights []string
 }
 
-func NewUserService(notificationFacade *NotificationFacade, repository *UserRepository, roleService *RoleService, rightService *RightService, conf *Config, log *zap.Logger) *UserService {
+func NewUserService(notificationFacade *notifications.NotificationFacade, repository *UserRepository, roleService *permissions.RoleService, rightService *permissions.RightService, conf *passport.Config, log *zap.Logger) *UserService {
 	return &UserService{notificationFacade: notificationFacade, repository: repository, roleService: roleService, rightService: rightService, conf: conf, log: log}
 }
 
@@ -55,7 +59,7 @@ func (s *UserService) CreateUser(ctx context.Context, username string, email str
 		return nil, eris.New("Email already exists")
 	}
 
-	hashedPassword, err := Hash(password)
+	hashedPassword, err := passport.Hash(password)
 	if err != nil {
 		return nil, eris.Wrap(err, "Could not hash password")
 	}
@@ -69,7 +73,7 @@ func (s *UserService) CreateUser(ctx context.Context, username string, email str
 		return nil, eris.New("could not find role")
 	}
 
-	rights := make([]*Right, 0)
+	rights := make([]*permissions.Right, 0)
 	for _, rightName := range rr {
 		right, err := s.rightService.GetByName(ctx, rightName)
 		if err != nil {
@@ -102,7 +106,7 @@ func (s *UserService) CreateUser(ctx context.Context, username string, email str
 	newUser.ID = ID
 
 	if !isAdmin {
-		s.notificationFacade.Publish(ctx, "email", Message{
+		s.notificationFacade.Publish(ctx, "email", notifications.Message{
 			Topic:     "email_verification",
 			Header:    "Email Verification",
 			Body:      fmt.Sprintf("Verification link: http://%s//verify/%s\n", s.conf.Swagger.Host, token),
@@ -178,18 +182,18 @@ func (s *UserService) BasicAuthToken(ctx context.Context, username, password str
 		return "", "", 0, err
 	}
 
-	if user == nil || !Match(password, user.Password) {
+	if user == nil || !passport.Match(password, user.Password) {
 		return "", "", 0, eris.New("Username or password is wrong")
 	}
 
 	userClaims := s.MapToUserClaims(user)
 
-	tokenString, exp, err := s.issueAccessToken(userClaims)
+	tokenString, exp, err := s.IssueAccessToken(userClaims)
 	if err != nil {
 		return "", "", 0, err
 	}
 
-	refreshTokenString, err := s.issueRefreshToken(userClaims)
+	refreshTokenString, err := s.IssueRefreshToken(userClaims)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -197,7 +201,7 @@ func (s *UserService) BasicAuthToken(ctx context.Context, username, password str
 	return tokenString, refreshTokenString, exp, nil
 }
 
-func (s *UserService) issueAccessToken(userClaims *UserClaims) (string, int, error) {
+func (s *UserService) IssueAccessToken(userClaims *UserClaims) (string, int, error) {
 
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
@@ -225,7 +229,7 @@ func (s *UserService) issueAccessToken(userClaims *UserClaims) (string, int, err
 	return tokenString, exp, nil
 }
 
-func (s *UserService) issueRefreshToken(userClaims *UserClaims) (string, error) {
+func (s *UserService) IssueRefreshToken(userClaims *UserClaims) (string, error) {
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
 		return "", err
@@ -257,7 +261,7 @@ func (s *UserService) issueRefreshToken(userClaims *UserClaims) (string, error) 
 func (s *UserService) RefreshToken(ctx context.Context, t string) (string, int, error) {
 	userClaims, err := s.ValidateToken(ctx, t)
 	if err != nil {
-		accessToken, exp, err := s.issueAccessToken(userClaims)
+		accessToken, exp, err := s.IssueAccessToken(userClaims)
 		return accessToken, exp, err
 	}
 
@@ -398,13 +402,13 @@ func (s *UserService) GetById(ctx context.Context, id primitive.ObjectID) (*User
 	return u, nil
 }
 
-func (s *UserService) LoadPermisions(ctx context.Context, user *User) (*Role, []Right, error) {
+func (s *UserService) LoadPermisions(ctx context.Context, user *User) (*permissions.Role, []permissions.Right, error) {
 	role, err := s.roleService.GetById(ctx, user.Role)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	rights := make([]Right, 0)
+	rights := make([]permissions.Right, 0)
 
 	if len(user.Rights) > 0 {
 		rights, err = s.rightService.GetManyByIds(ctx, user.Rights)
@@ -456,7 +460,7 @@ func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 		return
 	}
 
-	s.notificationFacade.Publish(ctx, "email", Message{
+	s.notificationFacade.Publish(ctx, "email", notifications.Message{
 		Topic:     "identity",
 		Header:    "Password Recovery",
 		Body:      fmt.Sprintf("Your recovery code is: %s", code),
@@ -464,7 +468,7 @@ func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 		Timestamp: time.Now().Unix(),
 	}, u.ID.Hex())
 
-	hashedCode, err := Hash(code)
+	hashedCode, err := passport.Hash(code)
 	if err != nil {
 		s.log.Error("could not hash code")
 		return
@@ -498,7 +502,7 @@ func (s *UserService) ExchangeRecoveryCode(ctx context.Context, email string, co
 		return "", eris.New(generalErrorMsg)
 	}
 
-	if !Match(code, existingCodeHash) {
+	if !passport.Match(code, existingCodeHash) {
 		return "", eris.New("Provided recovery code does not match")
 	}
 
@@ -507,7 +511,7 @@ func (s *UserService) ExchangeRecoveryCode(ctx context.Context, email string, co
 		return "", eris.Wrap(err, "could no generate code")
 	}
 
-	resettingCodeHash, err := Hash(resettingCode)
+	resettingCodeHash, err := passport.Hash(resettingCode)
 	if err != nil {
 		return "", eris.Wrap(err, "could no hash resetting code")
 	}
@@ -534,11 +538,11 @@ func (s *UserService) ResetPassword(ctx context.Context, email string, code stri
 		return err
 	}
 
-	if !Match(code, existingCodeHash) {
+	if !passport.Match(code, existingCodeHash) {
 		return eris.New("Provided recovery code does not match")
 	}
 
-	hashedPassword, err := Hash(newPassword)
+	hashedPassword, err := passport.Hash(newPassword)
 	if err != nil {
 		return err
 	}
@@ -561,7 +565,7 @@ func generateCode(size int) (string, error) {
 	return base64.URLEncoding.EncodeToString(token), nil
 }
 
-func (s *UserService) MapToUserResponse(ctx context.Context, u *User) (*UserResponse, error) {
+func (s *UserService) MapToUserResponse(ctx context.Context, u *User) (*responses.UserResponse, error) {
 
 	role, err := s.roleService.GetById(ctx, u.Role)
 	if err != nil {
@@ -582,7 +586,7 @@ func (s *UserService) MapToUserResponse(ctx context.Context, u *User) (*UserResp
 
 	}
 
-	return &UserResponse{
+	return &responses.UserResponse{
 		ID:       u.ID.Hex(),
 		Username: u.Username,
 		Email:    u.Email,

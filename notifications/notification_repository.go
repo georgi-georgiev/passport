@@ -1,18 +1,19 @@
-package passport
+package notifications
 
 import (
 	"context"
 
+	"github.com/georgi-georgiev/passport"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type NotificationRepository struct {
-	*MongoRepository
+	*passport.MongoRepository
 }
 
-func NewNotificationRepository(client *mongo.Client, conf *Config) *NotificationRepository {
-	repository := NewMongoRepository(client, conf.Mongo.Dbname, "notifications")
+func NewNotificationRepository(client *mongo.Client, conf *passport.Config) *NotificationRepository {
+	repository := passport.NewMongoRepository(client, conf.Mongo.Dbname, "notifications")
 	return &NotificationRepository{repository}
 }
 

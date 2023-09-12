@@ -1,10 +1,12 @@
-package passport
+package users
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
+	"github.com/georgi-georgiev/passport"
+	"github.com/georgi-georgiev/passport/permissions"
 	"github.com/rotisserie/eris"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,11 +15,11 @@ import (
 )
 
 type UserRepository struct {
-	*MongoRepository
+	*passport.MongoRepository
 }
 
-func NewUserRepository(client *mongo.Client, conf *Config, roleRepository *RoleRepository) *UserRepository {
-	repository := NewMongoRepository(client, conf.Mongo.Dbname, "users")
+func NewUserRepository(client *mongo.Client, conf *passport.Config, roleRepository *permissions.RoleRepository) *UserRepository {
+	repository := passport.NewMongoRepository(client, conf.Mongo.Dbname, "users")
 
 	usernameIndex := mongo.IndexModel{
 		Keys:    bson.D{{Key: "username", Value: 1}},
@@ -34,7 +36,7 @@ func NewUserRepository(client *mongo.Client, conf *Config, roleRepository *RoleR
 		panic(err)
 	}
 
-	hashedPassword, err := Hash("admin")
+	hashedPassword, err := passport.Hash("admin")
 	if err != nil {
 		panic(err)
 	}

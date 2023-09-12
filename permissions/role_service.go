@@ -1,8 +1,9 @@
-package passport
+package permissions
 
 import (
 	"context"
 
+	"github.com/georgi-georgiev/passport/payloads"
 	"github.com/rotisserie/eris"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,7 +16,7 @@ func NewRoleService(repository *RoleRepository) *RoleService {
 	return &RoleService{repository: repository}
 }
 
-func (s *RoleService) CreateRole(ctx context.Context, payload CreateRolePayload) (*Role, error) {
+func (s *RoleService) CreateRole(ctx context.Context, payload payloads.CreateRolePayload) (*Role, error) {
 
 	role := &Role{
 		Name: payload.Name,

@@ -1,8 +1,10 @@
-package passport
+package permissions
 
 import (
 	"context"
 
+	"github.com/georgi-georgiev/passport"
+	"github.com/georgi-georgiev/passport/payloads"
 	"github.com/rotisserie/eris"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,15 +13,15 @@ import (
 
 type RightService struct {
 	repository *RightRepository
-	conf       *Config
+	conf       *passport.Config
 	log        *zap.Logger
 }
 
-func NewRightService(repository *RightRepository, conf *Config, log *zap.Logger) *RightService {
+func NewRightService(repository *RightRepository, conf *passport.Config, log *zap.Logger) *RightService {
 	return &RightService{repository: repository, conf: conf, log: log}
 }
 
-func (s *RightService) CreateRight(ctx context.Context, payload CreateRightPayload) (*Right, error) {
+func (s *RightService) CreateRight(ctx context.Context, payload payloads.CreateRightPayload) (*Right, error) {
 
 	right := &Right{
 		Name: payload.Name,

@@ -6,6 +6,11 @@ import (
 
 	"github.com/georgi-georgiev/blunder"
 	"github.com/georgi-georgiev/passport"
+	"github.com/georgi-georgiev/passport/middlewares"
+	"github.com/georgi-georgiev/passport/notifications"
+	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/router"
+	"github.com/georgi-georgiev/passport/users"
 
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/fx"
@@ -33,29 +38,32 @@ func main() {
 			blunder.NewRFC,
 			passport.NewGinEngine,
 			passport.NewMongoClient,
-
-			passport.NewNotificationRepository,
 			passport.NewMailCleint,
-			passport.NewNotificationFacade,
-			passport.NewNotificationService,
-			passport.NewNotificationHandlers,
 
-			passport.NewRoleRepository,
-			passport.NewUserRepository,
-			passport.NewRightRepository,
-			passport.NewUserService,
-			passport.NewRoleService,
-			passport.NewRightService,
-			passport.NewHandlers,
-			passport.NewMiddleware,
+			notifications.NewNotificationRepository,
+			notifications.NewNotificationFacade,
+			notifications.NewNotificationService,
+			notifications.NewNotificationHandlers,
+
+			permissions.NewRightRepository,
+			permissions.NewRightService,
+			permissions.NewRoleRepository,
+			permissions.NewRoleService,
+			permissions.NewPermissionHandlers,
+
+			users.NewUserRepository,
+			users.NewUserService,
+			users.NewUserHandlers,
+
+			middlewares.NewMiddleware,
 		),
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: logger}
 		}),
 		fx.Invoke(func(*http.Server) {}),
-		fx.Invoke(func(notifcationService *passport.NotificationService) {
+		fx.Invoke(func(notifcationService *notifications.NotificationService) {
 			notifcationService.Listener()
 		}),
-		fx.Invoke(passport.Router),
+		fx.Invoke(router.Router),
 	).Run()
 }

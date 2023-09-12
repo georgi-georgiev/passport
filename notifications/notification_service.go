@@ -1,21 +1,22 @@
-package passport
+package notifications
 
 import (
 	"context"
 	"time"
 
+	"github.com/georgi-georgiev/passport"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 )
 
 type NotificationService struct {
 	repository *NotificationRepository
-	conf       *Config
+	conf       *passport.Config
 	log        *zap.Logger
-	mc         *MailClient
+	mc         *passport.MailClient
 }
 
-func NewNotificationService(repository *NotificationRepository, conf *Config, log *zap.Logger, mc *MailClient) *NotificationService {
+func NewNotificationService(repository *NotificationRepository, conf *passport.Config, log *zap.Logger, mc *passport.MailClient) *NotificationService {
 	return &NotificationService{repository: repository, conf: conf, log: log, mc: mc}
 }
 

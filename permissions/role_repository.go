@@ -1,20 +1,21 @@
-package passport
+package permissions
 
 import (
 	"context"
 	"strings"
 
+	"github.com/georgi-georgiev/passport"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type RoleRepository struct {
-	*MongoRepository
+	*passport.MongoRepository
 }
 
-func NewRoleRepository(client *mongo.Client, conf *Config) *RoleRepository {
-	repository := NewMongoRepository(client, conf.Mongo.Dbname, "roles")
+func NewRoleRepository(client *mongo.Client, conf *passport.Config) *RoleRepository {
+	repository := passport.NewMongoRepository(client, conf.Mongo.Dbname, "roles")
 
 	nameIndex := mongo.IndexModel{
 		Keys:    bson.D{{Key: "name", Value: 1}},

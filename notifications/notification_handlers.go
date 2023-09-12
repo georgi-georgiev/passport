@@ -1,4 +1,4 @@
-package passport
+package notifications
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package passport
+package schema
 
 import "testing"
 

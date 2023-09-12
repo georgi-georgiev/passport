@@ -1,20 +1,21 @@
-package passport
+package permissions
 
 import (
 	"context"
 	"strings"
 
+	"github.com/georgi-georgiev/passport"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type RightRepository struct {
-	*MongoRepository
+	*passport.MongoRepository
 }
 
-func NewRightRepository(client *mongo.Client, conf *Config) *RightRepository {
-	repository := NewMongoRepository(client, conf.Mongo.Dbname, "rights")
+func NewRightRepository(client *mongo.Client, conf *passport.Config) *RightRepository {
+	repository := passport.NewMongoRepository(client, conf.Mongo.Dbname, "rights")
 
 	nameIndex := mongo.IndexModel{
 		Keys:    bson.D{{Key: "name", Value: 1}},

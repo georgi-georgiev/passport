@@ -1,10 +1,12 @@
-package passport
+package middlewares
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/georgi-georgiev/blunder"
+	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/users"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
@@ -12,13 +14,13 @@ import (
 )
 
 type IdentityMiddleware struct {
-	userRervice  *UserService
-	roleService  *RoleService
-	rightService *RightService
+	userRervice  *users.UserService
+	roleService  *permissions.RoleService
+	rightService *permissions.RightService
 	log          *zap.Logger
 }
 
-func NewMiddleware(userRervice *UserService, roleServce *RoleService, rightService *RightService, log *zap.Logger) *IdentityMiddleware {
+func NewMiddleware(userRervice *users.UserService, roleServce *permissions.RoleService, rightService *permissions.RightService, log *zap.Logger) *IdentityMiddleware {
 	return &IdentityMiddleware{userRervice: userRervice, roleService: roleServce, rightService: rightService, log: log}
 }
 

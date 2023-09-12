@@ -1,25 +1,28 @@
-package passport
+package users
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/georgi-georgiev/blunder"
+	"github.com/georgi-georgiev/passport/payloads"
+	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/responses"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
-type Handlers struct {
+type UserHandlers struct {
 	userService  *UserService
-	roleService  *RoleService
-	rightService *RightService
+	roleService  *permissions.RoleService
+	rightService *permissions.RightService
 	log          *zap.Logger
 	blunder      *blunder.Blunder
 }
 
-func NewHandlers(userService *UserService, roleService *RoleService, rightService *RightService, log *zap.Logger, blunder *blunder.Blunder) *Handlers {
-	return &Handlers{userService: userService, roleService: roleService, rightService: rightService, log: log, blunder: blunder}
+func NewUserHandlers(userService *UserService, roleService *permissions.RoleService, rightService *permissions.RightService, log *zap.Logger, blunder *blunder.Blunder) *UserHandlers {
+	return &UserHandlers{userService: userService, roleService: roleService, rightService: rightService, log: log, blunder: blunder}
 }
 
 // CreateUserHandler godoc
@@ -34,14 +37,14 @@ func NewHandlers(userService *UserService, roleService *RoleService, rightServic
 // @Failure      404  {object}  blunder.HTTPErrorResponse
 // @Failure      500  {object}  blunder.HTTPErrorResponse
 // @Router /users [post]
-func (h *Handlers) CreateUser(c *gin.Context) {
+func (h *UserHandlers) CreateUser(c *gin.Context) {
 
 	if c.Request.Body == nil {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
 		return
 	}
 
-	var payload CreateUserPayload
+	var payload payloads.CreateUserPayload
 
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
@@ -64,19 +67,19 @@ func (h *Handlers) CreateUser(c *gin.Context) {
 
 	userClaims := h.userService.MapToUserClaims(user)
 
-	token, exp, err := h.userService.issueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.issueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, CreateUserResponse{ID: user.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
+	c.JSON(http.StatusCreated, responses.CreateUserResponse{ID: user.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
 }
 
 // VerifyEmailHandler godoc
@@ -87,7 +90,7 @@ func (h *Handlers) CreateUser(c *gin.Context) {
 // @Produce  json
 // @Param token path string true "1"
 // @Router /verify/{token} [post]
-func (h *Handlers) VerifyEmail(c *gin.Context) {
+func (h *UserHandlers) VerifyEmail(c *gin.Context) {
 	token := c.Param("token")
 	if token == "" {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
@@ -115,14 +118,14 @@ func (h *Handlers) VerifyEmail(c *gin.Context) {
 // @Failure      404  {object}  blunder.HTTPErrorResponse
 // @Failure      500  {object}  blunder.HTTPErrorResponse
 // @Router /admins [post]
-func (h *Handlers) CreateAdmin(c *gin.Context) {
+func (h *UserHandlers) CreateAdmin(c *gin.Context) {
 
 	if c.Request.Body == nil {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
 		return
 	}
 
-	var payload CreateUserPayload
+	var payload payloads.CreateUserPayload
 
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
@@ -140,19 +143,19 @@ func (h *Handlers) CreateAdmin(c *gin.Context) {
 
 	userClaims := h.userService.MapToUserClaims(user)
 
-	token, exp, err := h.userService.issueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.issueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, CreateUserResponse{ID: user.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
+	c.JSON(http.StatusCreated, responses.CreateUserResponse{ID: user.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
 }
 
 // UpdateUserHandler godoc
@@ -166,7 +169,7 @@ func (h *Handlers) CreateAdmin(c *gin.Context) {
 // @Param data body UpdateUserPayload true "data"
 // @Success 200 {object} UserResponse
 // @Router /users/{userId} [patch]
-func (h *Handlers) UpdateUser(c *gin.Context) {
+func (h *UserHandlers) UpdateUser(c *gin.Context) {
 	userIDParam := c.Param("userId")
 	if userIDParam == "" {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
@@ -179,7 +182,7 @@ func (h *Handlers) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var payload UpdateUserPayload
+	var payload payloads.UpdateUserPayload
 
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
@@ -218,7 +221,7 @@ func (h *Handlers) UpdateUser(c *gin.Context) {
 // @Security OAuth2Application
 // @Param userID path int true "1"
 // @Router /users/{userId} [delete]
-func (h *Handlers) DeleteUser(c *gin.Context) {
+func (h *UserHandlers) DeleteUser(c *gin.Context) {
 	userIDParam := c.Param("userId")
 	if userIDParam == "" {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
@@ -254,14 +257,14 @@ func (h *Handlers) DeleteUser(c *gin.Context) {
 // @Security OAuth2Application
 // @Success 200 {array} UserResponse
 // @Router /users [get]
-func (h *Handlers) GetUsers(c *gin.Context) {
+func (h *UserHandlers) GetUsers(c *gin.Context) {
 	users, err := h.userService.GetUsers(c.Request.Context())
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	response := []UserResponse{}
+	response := []responses.UserResponse{}
 	for _, u := range users {
 		r, err := h.userService.MapToUserResponse(c.Request.Context(), u)
 		if err != nil {
@@ -284,7 +287,7 @@ func (h *Handlers) GetUsers(c *gin.Context) {
 // @Param userID path int true "1"
 // @Success 200 {object} UserResponse
 // @Router /users/{userId} [get]
-func (h *Handlers) GetUserById(c *gin.Context) {
+func (h *UserHandlers) GetUserById(c *gin.Context) {
 	userIDParam := c.Param("userId")
 	if userIDParam == "" {
 		c.JSON(http.StatusBadRequest, blunder.BadRequest())
@@ -327,7 +330,7 @@ func (h *Handlers) GetUserById(c *gin.Context) {
 // @Param type query string false "refresh_token"
 // @Success 200 {object} TokenResponse
 // @Router /token [post]
-func (h *Handlers) GetToken(c *gin.Context) {
+func (h *UserHandlers) GetToken(c *gin.Context) {
 
 	t := c.Request.URL.Query().Get("type")
 	if t == "refresh_token" {
@@ -336,7 +339,7 @@ func (h *Handlers) GetToken(c *gin.Context) {
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 		} else {
-			c.JSON(http.StatusOK, TokenResponse{TokenType: "Bearer", AccessToken: token, RefreshToken: refToken, ExpiresIn: exp})
+			c.JSON(http.StatusOK, responses.TokenResponse{TokenType: "Bearer", AccessToken: token, RefreshToken: refToken, ExpiresIn: exp})
 		}
 		return
 	}
@@ -347,7 +350,7 @@ func (h *Handlers) GetToken(c *gin.Context) {
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 		} else {
-			c.JSON(http.StatusOK, TokenResponse{TokenType: "Bearer", AccessToken: accessToken, RefreshToken: refreshToken, ExpiresIn: exp})
+			c.JSON(http.StatusOK, responses.TokenResponse{TokenType: "Bearer", AccessToken: accessToken, RefreshToken: refreshToken, ExpiresIn: exp})
 		}
 		return
 	}
@@ -363,8 +366,8 @@ func (h *Handlers) GetToken(c *gin.Context) {
 // @Produce  json
 // @Param data body RecoveryEmailPayload true "data"
 // @Router /password-recovery/email [post]
-func (h *Handlers) PasswordRecovery(c *gin.Context) {
-	var payload RecoveryEmailPayload
+func (h *UserHandlers) PasswordRecovery(c *gin.Context) {
+	var payload payloads.RecoveryEmailPayload
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
 		for _, err := range errors {
@@ -387,8 +390,8 @@ func (h *Handlers) PasswordRecovery(c *gin.Context) {
 // @Param data body ExchangeCodeRequestPayload true "data"
 // @Success 200 {object} ExchangeCodeResponse
 // @Router /password-recovery/exchange [post]
-func (h *Handlers) ExchangeRecoveryCode(c *gin.Context) {
-	var payload ExchangeCodeRequestPayload
+func (h *UserHandlers) ExchangeRecoveryCode(c *gin.Context) {
+	var payload payloads.ExchangeCodeRequestPayload
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
 		for _, err := range errors {
@@ -403,7 +406,7 @@ func (h *Handlers) ExchangeRecoveryCode(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ExchangeCodeResponse{Code: code})
+	c.JSON(http.StatusOK, responses.ExchangeCodeResponse{Code: code})
 }
 
 // ResetPasswordHandler godoc
@@ -414,8 +417,8 @@ func (h *Handlers) ExchangeRecoveryCode(c *gin.Context) {
 // @Produce  json
 // @Param data body PasswordResetPayload true "data"
 // @Router /password-recovery/reset [post]
-func (h *Handlers) ResetPassword(c *gin.Context) {
-	var payload PasswordResetPayload
+func (h *UserHandlers) ResetPassword(c *gin.Context) {
+	var payload payloads.PasswordResetPayload
 	errors := h.blunder.BindJson(c.Request, &payload)
 	if errors != nil {
 		for _, err := range errors {

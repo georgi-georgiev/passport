@@ -1,8 +1,9 @@
-package passport
+package users
 
 import (
 	"time"
 
+	"github.com/georgi-georgiev/passport/permissions"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,7 +23,7 @@ type User struct {
 	Rights            []primitive.ObjectID `bson:"rights,omitempty"`
 }
 
-func NewUser(verificationToken string, username string, email string, passwordHash string, role *Role, rights []*Right) *User {
+func NewUser(verificationToken string, username string, email string, passwordHash string, role *permissions.Role, rights []*permissions.Right) *User {
 
 	rightsIds := make([]primitive.ObjectID, 0)
 	for _, right := range rights {

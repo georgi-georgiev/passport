@@ -1,9 +1,10 @@
-package passport
+package users
 
 import (
 	"net/http"
 
 	"github.com/georgi-georgiev/blunder"
+	"github.com/georgi-georgiev/passport/responses"
 	"github.com/gin-gonic/gin"
 	fb "github.com/huandu/facebook/v2"
 )
@@ -23,7 +24,7 @@ type FacebookUser struct {
 // @Param data body CreateUserPayload true "data"
 // @Success 201 {object} CreateUserResponse
 // @Router /facebook/callback [post]
-func (h *Handlers) FacebookCallback(c *gin.Context) {
+func (h *UserHandlers) FacebookCallback(c *gin.Context) {
 	accessToken := c.PostForm("accessToken")
 
 	facebookUser, err := verifyFacebookToken(accessToken)
@@ -42,19 +43,19 @@ func (h *Handlers) FacebookCallback(c *gin.Context) {
 
 		userClaims := h.userService.MapToUserClaims(existingUser)
 
-		token, exp, err := h.userService.issueAccessToken(userClaims)
+		token, exp, err := h.userService.IssueAccessToken(userClaims)
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 			return
 		}
 
-		refreshToken, err := h.userService.issueRefreshToken(userClaims)
+		refreshToken, err := h.userService.IssueRefreshToken(userClaims)
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 			return
 		}
 
-		c.JSON(http.StatusOK, CreateUserResponse{ID: existingUser.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
+		c.JSON(http.StatusOK, responses.CreateUserResponse{ID: existingUser.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
 		return
 	}
 
@@ -66,19 +67,19 @@ func (h *Handlers) FacebookCallback(c *gin.Context) {
 
 	userClaims := h.userService.MapToUserClaims(user)
 
-	token, exp, err := h.userService.issueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.issueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, CreateUserResponse{ID: existingUser.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
+	c.JSON(http.StatusCreated, responses.CreateUserResponse{ID: existingUser.ID.Hex(), TokenType: "Bearer", AccessToken: token, RefreshToken: refreshToken, ExpiresIn: exp})
 }
 
 func verifyFacebookToken(accessToken string) (*FacebookUser, error) {

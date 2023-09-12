@@ -1,4 +1,4 @@
-package passport
+package payloads
 
 type RecoveryEmailPayload struct {
 	Email string `json:"email" binding:"required"`
