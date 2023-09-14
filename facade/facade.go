@@ -1,9 +1,10 @@
-package notifications
+package facade
 
 import (
 	"context"
 	"time"
 
+	"github.com/georgi-georgiev/passport/notifications"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
@@ -18,17 +19,17 @@ type Message struct {
 }
 
 type NotificationFacade struct {
-	repository *NotificationRepository
+	repository *notifications.NotificationRepository
 	log        *zap.Logger
 }
 
-func NewNotificationFacade(repository *NotificationRepository, log *zap.Logger) *NotificationFacade {
+func NewNotificationFacade(repository *notifications.NotificationRepository, log *zap.Logger) *NotificationFacade {
 	return &NotificationFacade{repository: repository, log: log}
 }
 
 func (f *NotificationFacade) Publish(ctx context.Context, flow string, message Message, userId string) {
 	now := time.Now().UTC()
-	notification := &Notification{
+	notification := &notifications.Notification{
 		ID:        primitive.NewObjectID(),
 		CreatedOn: now,
 		Flow:      flow,

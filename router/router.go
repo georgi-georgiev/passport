@@ -1,15 +1,14 @@
 package router
 
 import (
-	"github.com/georgi-georgiev/passport"
-	"github.com/georgi-georgiev/passport/middlewares"
 	"github.com/georgi-georgiev/passport/notifications"
 	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/pkg/middlewares"
 	"github.com/georgi-georgiev/passport/users"
 	"github.com/gin-gonic/gin"
 )
 
-func Router(app *gin.Engine, conf *passport.Config, userHandlers *users.UserHandlers, permissionHandlers *permissions.PermissionHandlers, middleware *middlewares.IdentityMiddleware, notificationHandlers *notifications.NotificationHandlers) {
+func Router(app *gin.Engine, userHandlers *users.UserHandlers, permissionHandlers *permissions.PermissionHandlers, middleware *middlewares.IdentityMiddleware, notificationHandlers *notifications.NotificationHandlers) {
 	group := app.Group("")
 	{
 		group.POST("/admins", middleware.Authenticate(), middleware.Authorize("admin"), userHandlers.CreateAdmin)

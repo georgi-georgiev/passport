@@ -27,7 +27,7 @@ func NewGinEngine(conf *Config, logger *zap.Logger, blunder *blunder.Blunder, se
 
 	engine.Use(sentrygin.New(sentrygin.Options{}))
 
-	docs.SwaggerInfo.Host = conf.Swagger.Host
+	docs.SwaggerInfoidentity.Host = conf.Swagger.Host
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/georgi-georgiev/passport"
-	"github.com/georgi-georgiev/passport/notifications"
+	"github.com/georgi-georgiev/passport/facade"
 	"github.com/georgi-georgiev/passport/permissions"
 	"github.com/georgi-georgiev/passport/responses"
 	"github.com/golang-jwt/jwt"
@@ -21,7 +21,7 @@ import (
 )
 
 type UserService struct {
-	notificationFacade *notifications.NotificationFacade
+	notificationFacade *facade.NotificationFacade
 	repository         *UserRepository
 	roleService        *permissions.RoleService
 	rightService       *permissions.RightService
@@ -35,7 +35,7 @@ type UserClaims struct {
 	Rights []string
 }
 
-func NewUserService(notificationFacade *notifications.NotificationFacade, repository *UserRepository, roleService *permissions.RoleService, rightService *permissions.RightService, conf *passport.Config, log *zap.Logger) *UserService {
+func NewUserService(notificationFacade *facade.NotificationFacade, repository *UserRepository, roleService *permissions.RoleService, rightService *permissions.RightService, conf *passport.Config, log *zap.Logger) *UserService {
 	return &UserService{notificationFacade: notificationFacade, repository: repository, roleService: roleService, rightService: rightService, conf: conf, log: log}
 }
 
@@ -106,7 +106,7 @@ func (s *UserService) CreateUser(ctx context.Context, username string, email str
 	newUser.ID = ID
 
 	if !isAdmin {
-		s.notificationFacade.Publish(ctx, "email", notifications.Message{
+		s.notificationFacade.Publish(ctx, "email", facade.Message{
 			Topic:     "email_verification",
 			Header:    "Email Verification",
 			Body:      fmt.Sprintf("Verification link: http://%s//verify/%s\n", s.conf.Swagger.Host, token),
@@ -460,7 +460,7 @@ func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 		return
 	}
 
-	s.notificationFacade.Publish(ctx, "email", notifications.Message{
+	s.notificationFacade.Publish(ctx, "email", facade.Message{
 		Topic:     "identity",
 		Header:    "Password Recovery",
 		Body:      fmt.Sprintf("Your recovery code is: %s", code),

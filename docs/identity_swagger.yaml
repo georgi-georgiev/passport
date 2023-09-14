@@ -1,0 +1,14 @@
+info:
+  contact: {}
+  description: Passport
+  title: Passport
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  OAuth2Application:
+    flow: password
+    tokenUrl: http://localhost:2525//token
+    type: oauth2
+swagger: "2.0"

@@ -6,9 +6,10 @@ import (
 
 	"github.com/georgi-georgiev/blunder"
 	"github.com/georgi-georgiev/passport"
-	"github.com/georgi-georgiev/passport/middlewares"
+	"github.com/georgi-georgiev/passport/facade"
 	"github.com/georgi-georgiev/passport/notifications"
 	"github.com/georgi-georgiev/passport/permissions"
+	"github.com/georgi-georgiev/passport/pkg/middlewares"
 	"github.com/georgi-georgiev/passport/router"
 	"github.com/georgi-georgiev/passport/users"
 
@@ -41,7 +42,7 @@ func main() {
 			passport.NewMailCleint,
 
 			notifications.NewNotificationRepository,
-			notifications.NewNotificationFacade,
+			facade.NewNotificationFacade,
 			notifications.NewNotificationService,
 			notifications.NewNotificationHandlers,
 

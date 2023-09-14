@@ -53,6 +53,10 @@ test:
 	@echo Running tests
 	@go test -race -v .
 
+## Generate swagger docs
+swagger:
+	@swag init --dir cmd --parseVendor --instanceName identity
+
 ## Run benchmark tests
 bench:
 	@echo Running benchmark tests

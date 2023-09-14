@@ -1,0 +1,20 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Passport",
+        "title": "Passport",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {},
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        },
+        "OAuth2Application": {
+            "type": "oauth2",
+            "flow": "password",
+            "tokenUrl": "http://localhost:2525//token"
+        }
+    }
+}
