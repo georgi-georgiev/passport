@@ -2,7 +2,6 @@ package users
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/georgi-georgiev/blunder"
@@ -379,8 +378,8 @@ func (h *UserHandlers) JWKS(c *gin.Context) {
 		Kty: "RSA",
 		Kid: "example-key",
 		Use: "sig",
-		N:   key.N.String(),
-		E:   strconv.Itoa(key.E),
+		N:   key.N,
+		E:   key.E,
 	}
 
 	jwks := responses.Jwks{

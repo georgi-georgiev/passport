@@ -1,5 +1,7 @@
 package responses
 
+import "math/big"
+
 type IDResp struct {
 	ID string `json:"id" example:"1"`
 }
@@ -44,9 +46,9 @@ type Jwks struct {
 }
 
 type JSONWebKey struct {
-	Kty string `json:"kty"`
-	Kid string `json:"kid"`
-	Use string `json:"use"`
-	N   string `json:"n"`
-	E   string `json:"e"`
+	Kty string   `json:"kty"`
+	Kid string   `json:"kid"`
+	Use string   `json:"use"`
+	N   *big.Int `json:"n"`
+	E   int      `json:"e"`
 }
