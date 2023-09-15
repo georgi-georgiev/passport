@@ -38,3 +38,15 @@ type RoleResponse struct {
 type RightResponse struct {
 	Name string `json:"name" example:"default"`
 }
+
+type Jwks struct {
+	Keys []JSONWebKey `json:"keys"`
+}
+
+type JSONWebKey struct {
+	Kty string `json:"kty"`
+	Kid string `json:"kid"`
+	Use string `json:"use"`
+	N   string `json:"n"`
+	E   string `json:"e"`
+}

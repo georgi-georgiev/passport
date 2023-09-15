@@ -2,6 +2,7 @@ package users
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/georgi-georgiev/blunder"
@@ -356,6 +357,37 @@ func (h *UserHandlers) GetToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusBadRequest, blunder.BadRequest())
+}
+
+// GetJWKSHandler godoc
+// @Summary Get jwks
+// @Description get jwks
+// @Tags identity
+// @Accept  json
+// @Produce  json
+// @Security BasicAuth
+// @Success 200 {object} responses.Jwks
+// @Router /jwks [get]
+func (h *UserHandlers) JWKS(c *gin.Context) {
+	key, err := h.userService.GetPublicKey()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, blunder.InternalServerError())
+		return
+	}
+
+	jwk := responses.JSONWebKey{
+		Kty: "RSA",
+		Kid: "example-key",
+		Use: "sig",
+		N:   key.N.String(),
+		E:   strconv.Itoa(key.E),
+	}
+
+	jwks := responses.Jwks{
+		Keys: []responses.JSONWebKey{jwk},
+	}
+
+	c.JSON(http.StatusOK, jwks)
 }
 
 // EmailRecoveryCodeHandler godoc

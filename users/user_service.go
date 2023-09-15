@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -268,13 +269,17 @@ func (s *UserService) RefreshToken(ctx context.Context, t string) (string, int, 
 	return "", 0, err
 }
 
-func (s *UserService) ValidateToken(ctx context.Context, t string) (*UserClaims, error) {
+func (s *UserService) GetPublicKey() (*rsa.PublicKey, error) {
 	keyData, err := os.ReadFile(s.conf.App.PubKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	key, err := jwt.ParseRSAPublicKeyFromPEM(keyData)
+	return jwt.ParseRSAPublicKeyFromPEM(keyData)
+}
+
+func (s *UserService) ValidateToken(ctx context.Context, t string) (*UserClaims, error) {
+	key, err := s.GetPublicKey()
 	if err != nil {
 		return nil, err
 	}
@@ -321,11 +326,7 @@ func (s *UserService) ValidateToken(ctx context.Context, t string) (*UserClaims,
 }
 
 func (s *UserService) GetUserByToken(ctx context.Context, t string) (*User, error) {
-	keyData, err := os.ReadFile(s.conf.App.PubKeyPath)
-	if err != nil {
-		return nil, err
-	}
-	key, err := jwt.ParseRSAPublicKeyFromPEM(keyData)
+	key, err := s.GetPublicKey()
 	if err != nil {
 		return nil, err
 	}
