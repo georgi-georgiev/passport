@@ -18,7 +18,7 @@ func Router(app *gin.Engine, userHandlers *users.UserHandlers, permissionHandler
 		group.PATCH("/users/:userId", middleware.Authenticate(), middleware.Authorize("admin"), userHandlers.UpdateUser)
 		group.DELETE("/users/:userId", middleware.Authenticate(), middleware.Authorize("admin"), userHandlers.DeleteUser)
 		group.POST("/token", userHandlers.GetToken)
-		group.POST("/.well-known/jwks.json", userHandlers.JWKS)
+		group.GET("/.well-known/jwks.json", userHandlers.JWKS)
 		group.POST("/verify/:token", userHandlers.VerifyEmail)
 		group.POST("/password-recovery/email", userHandlers.PasswordRecovery)
 		group.POST("/password-recovery/exchange", userHandlers.ExchangeRecoveryCode)
