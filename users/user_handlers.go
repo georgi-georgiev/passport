@@ -367,7 +367,7 @@ func (h *UserHandlers) GetToken(c *gin.Context) {
 // @Produce  json
 // @Security BasicAuth
 // @Success 200 {object} responses.Jwks
-// @Router /jwks [get]
+// @Router /.well-known/jwks.json [get]
 func (h *UserHandlers) JWKS(c *gin.Context) {
 	key, err := h.userService.GetPublicKey()
 	if err != nil {
