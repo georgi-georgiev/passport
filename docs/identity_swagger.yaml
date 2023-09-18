@@ -9,6 +9,6 @@ securityDefinitions:
     type: basic
   OAuth2Application:
     flow: password
-    tokenUrl: http://localhost:2525//token
+    tokenUrl: http://localhost:3535/token
     type: oauth2
 swagger: "2.0"

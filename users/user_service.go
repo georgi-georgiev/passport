@@ -446,18 +446,18 @@ func (s *UserService) GetUsers(ctx context.Context) ([]*User, error) {
 func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 	u, err := s.repository.GetByEmail(ctx, email)
 	if err != nil {
-		s.log.Error("could not get user by email")
+		s.log.With(zap.Error(err)).Error("could not get user by email")
 		return
 	}
 
 	if u == nil {
-		s.log.Error("Email does not registered or email is absent")
+		s.log.With(zap.Error(err)).Error("Email does not registered or email is absent")
 		return
 	}
 
 	code, err := generateCode(6)
 	if err != nil {
-		s.log.Error("could not generate code")
+		s.log.With(zap.Error(err)).Error("could not generate code")
 		return
 	}
 
@@ -471,13 +471,13 @@ func (s *UserService) SendRecoveryEmail(ctx context.Context, email string) {
 
 	hashedCode, err := passport.Hash(code)
 	if err != nil {
-		s.log.Error("could not hash code")
+		s.log.With(zap.Error(err)).Error("could not hash code")
 		return
 	}
 
 	err = s.repository.SetRecoveryCode(ctx, u.ID, hashedCode)
 	if err != nil {
-		s.log.Error("could not set recovery code")
+		s.log.With(zap.Error(err)).Error("could not set recovery code")
 		return
 	}
 }

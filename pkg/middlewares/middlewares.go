@@ -37,39 +37,39 @@ func (m *IdentityMiddleware) Authenticate() gin.HandlerFunc {
 		token := headerItems[1]
 		userClaims, err := m.userRervice.ValidateToken(c.Request.Context(), token)
 		if err != nil {
-			m.log.Error("could not validate token")
+			m.log.With(zap.Error(err)).Error("could not validate token")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
 
 		userID, err := primitive.ObjectIDFromHex(userClaims.ID)
 		if err != nil {
-			m.log.Error("could not convert user id hex to primitive")
+			m.log.With(zap.Error(err)).Error("could not convert user id hex to primitive")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
 
 		user, err := m.userRervice.GetById(c.Request.Context(), userID)
 		if err != nil {
-			m.log.Error("could not convert user id hex to primitive")
+			m.log.With(zap.Error(err)).Error("could not convert user id hex to primitive")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
 
 		if user == nil {
-			m.log.Error("user does not exist")
+			m.log.With(zap.Error(err)).Error("user does not exist")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
 
 		if !user.IsActive {
-			m.log.Error("user is not active")
+			m.log.With(zap.Error(err)).Error("user is not active")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
 
 		if !user.IsVerified {
-			m.log.Error("user is not verified")
+			m.log.With(zap.Error(err)).Error("user is not verified")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
 			return
 		}
@@ -87,20 +87,20 @@ func (m *IdentityMiddleware) Authorize(roles ...string) gin.HandlerFunc {
 		r := c.GetString("role")
 		roleId, err := primitive.ObjectIDFromHex(r)
 		if err != nil {
-			m.log.Error("could not convert role id from hex to primitive object")
+			m.log.With(zap.Error(err)).Error("could not convert role id from hex to primitive object")
 			c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 			return
 		}
 
 		rr, err := m.roleService.GetById(c.Request.Context(), roleId)
 		if err != nil {
-			m.log.Error("could not get role by id")
+			m.log.With(zap.Error(err)).Error("could not get role by id")
 			c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 			return
 		}
 
 		if rr == nil {
-			m.log.Error("role is missing")
+			m.log.With(zap.Error(err)).Error("role is missing")
 			c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 			return
 		}
@@ -114,7 +114,7 @@ func (m *IdentityMiddleware) Authorize(roles ...string) gin.HandlerFunc {
 		}
 
 		if !roleExists {
-			m.log.Error("role is not containing in the list", zap.String("name", rr.Name), zap.Strings("roles", roles))
+			m.log.With(zap.Error(err)).Error("role is not containing in the list", zap.String("name", rr.Name), zap.Strings("roles", roles))
 			c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 			return
 		}
@@ -131,7 +131,7 @@ func (m *IdentityMiddleware) AuthorizeSpecific(rrs []string) gin.HandlerFunc {
 		for _, r := range rights {
 			rightId, err := primitive.ObjectIDFromHex(r)
 			if err != nil {
-				m.log.Error("could not convert right id from hex to primitive object")
+				m.log.With(zap.Error(err)).Error("could not convert right id from hex to primitive object")
 				c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 				return
 			}
@@ -141,7 +141,7 @@ func (m *IdentityMiddleware) AuthorizeSpecific(rrs []string) gin.HandlerFunc {
 
 		rr, err := m.rightService.GetManyByIds(c.Request.Context(), rightIds)
 		if err != nil {
-			m.log.Error("could not get rights")
+			m.log.With(zap.Error(err)).Error("could not get rights")
 			c.AbortWithStatusJSON(http.StatusForbidden, blunder.Forbidden())
 			return
 		}

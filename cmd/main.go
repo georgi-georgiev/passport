@@ -26,8 +26,8 @@ import (
 // @in header
 // @name Authorization
 // @securitydefinitions.oauth2.password OAuth2Application
-// @tokenUrl http://localhost:2525//token
-// @authorizationurl http://localhost:2525//token
+// @tokenUrl http://localhost:3535/token
+// @authorizationurl http://localhost:3535/token
 func main() {
 	fx.New(
 		fx.Provide(

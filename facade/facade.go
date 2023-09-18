@@ -54,7 +54,7 @@ func (f *NotificationFacade) Publish(ctx context.Context, flow string, message M
 
 	_, err := f.repository.Create(ctx, notification)
 	if err != nil {
-		f.log.Error("could not create notification")
+		f.log.With(zap.Error(err)).Error("could not create notification")
 		return
 	}
 }

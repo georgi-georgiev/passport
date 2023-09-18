@@ -22,7 +22,7 @@ const docTemplateidentity = `{
         "OAuth2Application": {
             "type": "oauth2",
             "flow": "password",
-            "tokenUrl": "http://localhost:2525//token"
+            "tokenUrl": "http://localhost:3535/token"
         }
     }
 }`

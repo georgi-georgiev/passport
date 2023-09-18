@@ -27,20 +27,20 @@ func (s *NotificationService) Listener() {
 			//TODO:for now only emails will not be sent
 			notifications, err := s.repository.GetAllNotSent(context.Background())
 			if err != nil {
-				s.log.Error("could not get notifications")
+				s.log.With(zap.Error(err)).Error("could not get notifications")
 				return
 			}
 
 			for _, notification := range notifications {
 				email, found := notification.Params["email"]
 				if !found {
-					s.log.Error("email parameter not found")
+					s.log.With(zap.Error(err)).Error("email parameter not found")
 					return
 				}
 
 				err = s.mc.Send(context.Background(), notification.Header, notification.Body, email)
 				if err != nil {
-					s.log.Error("could not send email")
+					s.log.With(zap.Error(err)).Error("could not send email")
 					return
 				}
 
@@ -48,7 +48,7 @@ func (s *NotificationService) Listener() {
 
 				err = s.repository.UpdateById(context.Background(), notification.ID, bson.M{"isSent": true, "sentOn": now})
 				if err != nil {
-					s.log.Error("could not update notification")
+					s.log.With(zap.Error(err)).Error("could not update notification")
 					return
 				}
 			}
