@@ -6,7 +6,7 @@ import (
 
 func NewSentry(conf *Config) *sentry.Client {
 	sentryClient, err := sentry.NewClient(sentry.ClientOptions{
-		Dsn:           conf.Sentry.DSN,
+		Dsn:           conf.Sentry.DNS,
 		EnableTracing: true,
 	})
 

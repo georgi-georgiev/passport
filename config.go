@@ -42,7 +42,7 @@ type MongoConfiguration struct {
 }
 
 type SentryConfiguration struct {
-	DSN string
+	DNS string
 }
 
 type MailConfiguration struct {
