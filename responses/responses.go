@@ -10,7 +10,7 @@ type TokenResponse struct {
 	TokenType    string `json:"tokenType" example:"Bearer"`
 	AccessToken  string `json:"accessToken" example:"token"`
 	RefreshToken string `json:"refreshToken" example:"token"`
-	ExpiresIn    int    `json:"expiresIn" example:"1687957803"`
+	ExpiresIn    int64  `json:"expiresIn" example:"1687957803"`
 }
 
 type ExchangeCodeResponse struct {
@@ -22,7 +22,7 @@ type CreateUserResponse struct {
 	TokenType    string `json:"tokenType" example:"Bearer"`
 	AccessToken  string `json:"accessToken" example:"1"`
 	RefreshToken string `json:"refreshToken" example:"token"`
-	ExpiresIn    int    `json:"expiresIn" example:"1687957803"`
+	ExpiresIn    int64  `json:"expiresIn" example:"1687957803"`
 }
 
 type UserResponse struct {
@@ -51,10 +51,4 @@ type JSONWebKey struct {
 	Use string   `json:"use"`
 	N   *big.Int `json:"n"`
 	E   int      `json:"e"`
-}
-
-type UserClaims struct {
-	ID     string
-	Role   string
-	Rights []string
 }

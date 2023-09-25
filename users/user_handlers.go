@@ -65,15 +65,13 @@ func (h *UserHandlers) CreateUser(c *gin.Context) {
 		return
 	}
 
-	userClaims := h.userService.MapToUserClaims(user)
-
-	token, exp, err := h.userService.IssueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
@@ -141,15 +139,13 @@ func (h *UserHandlers) CreateAdmin(c *gin.Context) {
 		return
 	}
 
-	userClaims := h.userService.MapToUserClaims(user)
-
-	token, exp, err := h.userService.IssueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return

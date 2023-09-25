@@ -169,7 +169,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id primitive.ObjectID) (bo
 	return isDeleted, nil
 }
 
-func (s *UserService) BasicAuthToken(ctx context.Context, username, password string) (string, string, int, error) {
+func (s *UserService) BasicAuthToken(ctx context.Context, username, password string) (string, string, int64, error) {
 
 	//TODO: implement with only 1 query for optimization
 	user, err := s.GetUserByUsername(ctx, username)
@@ -181,14 +181,12 @@ func (s *UserService) BasicAuthToken(ctx context.Context, username, password str
 		return "", "", 0, eris.New("Username or password is wrong")
 	}
 
-	userClaims := s.MapToUserClaims(user)
-
-	tokenString, exp, err := s.IssueAccessToken(userClaims)
+	tokenString, exp, err := s.IssueAccessToken(user)
 	if err != nil {
 		return "", "", 0, err
 	}
 
-	refreshTokenString, err := s.IssueRefreshToken(userClaims)
+	refreshTokenString, err := s.IssueRefreshToken(user)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -196,7 +194,7 @@ func (s *UserService) BasicAuthToken(ctx context.Context, username, password str
 	return tokenString, refreshTokenString, exp, nil
 }
 
-func (s *UserService) IssueAccessToken(userClaims *responses.UserClaims) (string, int, error) {
+func (s *UserService) IssueAccessToken(user *User) (string, int64, error) {
 
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
@@ -207,24 +205,19 @@ func (s *UserService) IssueAccessToken(userClaims *responses.UserClaims) (string
 		return "", 0, err
 	}
 
-	exp := int(time.Now().Add(time.Hour).UTC().Unix())
+	userClaims := s.MapToUserClaims(user)
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"userId": userClaims.ID,
-		"exp":    exp,
-		"role":   userClaims.Role,
-		"rights": userClaims.Rights,
-	})
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, userClaims)
 
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		return "", 0, err
 	}
 
-	return tokenString, exp, nil
+	return tokenString, userClaims.ExpiresAt, nil
 }
 
-func (s *UserService) IssueRefreshToken(userClaims *responses.UserClaims) (string, error) {
+func (s *UserService) IssueRefreshToken(user *User) (string, error) {
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
 		return "", err
@@ -235,14 +228,9 @@ func (s *UserService) IssueRefreshToken(userClaims *responses.UserClaims) (strin
 		return "", err
 	}
 
-	exp := time.Now().AddDate(1, 0, 0).UTC().Unix()
+	userClaims := s.MapToUserClaims(user)
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"userId": userClaims.ID,
-		"exp":    exp,
-		"role":   userClaims.Role,
-		"rights": userClaims.Rights,
-	})
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodRS256, userClaims)
 
 	refreshTokenString, err := refreshToken.SignedString(key)
 	if err != nil {
@@ -253,14 +241,29 @@ func (s *UserService) IssueRefreshToken(userClaims *responses.UserClaims) (strin
 }
 
 // RefreshToken refreshes existing token
-func (s *UserService) RefreshToken(ctx context.Context, t string) (string, int, error) {
+func (s *UserService) RefreshToken(ctx context.Context, t string) (string, int64, error) {
 	userClaims, err := s.ValidateToken(ctx, t)
 	if err != nil {
-		accessToken, exp, err := s.IssueAccessToken(userClaims)
-		return accessToken, exp, err
+		return "", 0, err
 	}
 
-	return "", 0, err
+	userId, err := primitive.ObjectIDFromHex(userClaims.Id)
+	if err != nil {
+		return "", 0, err
+	}
+
+	user, err := s.GetById(ctx, userId)
+	if err != nil {
+		return "", 0, err
+	}
+
+	accessToken, exp, err := s.IssueAccessToken(user)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return accessToken, exp, err
+
 }
 
 func (s *UserService) GetPublicKey() (*rsa.PublicKey, error) {
@@ -272,7 +275,7 @@ func (s *UserService) GetPublicKey() (*rsa.PublicKey, error) {
 	return jwt.ParseRSAPublicKeyFromPEM(keyData)
 }
 
-func (s *UserService) ValidateToken(ctx context.Context, t string) (*responses.UserClaims, error) {
+func (s *UserService) ValidateToken(ctx context.Context, t string) (*passport.UserClaims, error) {
 	key, err := s.GetPublicKey()
 	if err != nil {
 		return nil, err
@@ -288,32 +291,8 @@ func (s *UserService) ValidateToken(ctx context.Context, t string) (*responses.U
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userId, ok := claims["userId"].(string)
-		if !ok {
-			return nil, eris.New("user id is not string")
-		}
-
-		role, ok := claims["role"].(string)
-		if !ok {
-			return nil, eris.New("role is not string")
-		}
-
-		rights, ok := claims["rights"].([]interface{})
-		if !ok {
-			return nil, eris.New("rights is not interface array")
-		}
-
-		r := make([]string, 0)
-		for _, right := range rights {
-			r = append(r, right.(string))
-		}
-
-		return &responses.UserClaims{
-			ID:     userId,
-			Role:   role,
-			Rights: r,
-		}, nil
+	if claims, ok := token.Claims.(passport.UserClaims); ok && token.Valid {
+		return &claims, nil
 	}
 
 	return nil, nil
@@ -335,13 +314,8 @@ func (s *UserService) GetUserByToken(ctx context.Context, t string) (*User, erro
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userIdHex, ok := claims["userId"].(string)
-		if !ok {
-			return nil, eris.New("user id is not string")
-		}
-
-		userId, err := primitive.ObjectIDFromHex(userIdHex)
+	if claims, ok := token.Claims.(passport.UserClaims); ok && token.Valid {
+		userId, err := primitive.ObjectIDFromHex(claims.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -590,16 +564,19 @@ func (s *UserService) MapToUserResponse(ctx context.Context, u *User) (*response
 	}, nil
 }
 
-func (s *UserService) MapToUserClaims(u *User) *responses.UserClaims {
+func (s *UserService) MapToUserClaims(u *User) *passport.UserClaims {
 	rightsIds := make([]string, 0)
 	for _, right := range u.Rights {
 		rightsIds = append(rightsIds, right.Hex())
 	}
 
-	userClaims := &responses.UserClaims{
-		ID:     u.ID.Hex(),
+	userClaims := &passport.UserClaims{
 		Role:   u.Role.Hex(),
 		Rights: rightsIds,
+		StandardClaims: jwt.StandardClaims{
+			Id:        u.ID.Hex(),
+			ExpiresAt: time.Now().Add(time.Hour).UTC().Unix(),
+		},
 	}
 
 	return userClaims

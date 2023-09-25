@@ -1,0 +1,622 @@
+{
+	"info": {
+		"_postman_id": "2e9ef270-ec04-41b3-a1e3-98e16517a53a",
+		"name": "identity",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2665256"
+	},
+	"item": [
+		{
+			"name": "create user",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"georgi.georgiev.it@gmail.com\",\n  \"username\": \"test\",\n  \"password\": \"test\",\n  \"role\":\"brand\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/users",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create admin",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test3@test.com\",\n  \"password\": \"test3\",\n  \"username\": \"test3\",\n  \"role\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/admins",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"admins"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get users",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/users",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by id",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/users/64ac1ac7ac629fbaa98f99d4",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"users",
+						"64ac1ac7ac629fbaa98f99d4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"goshe\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/users/64ac1ac7ac629fbaa98f99d4",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"users",
+						"64ac1ac7ac629fbaa98f99d4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/users/649f0426da5833d0c325046b",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"users",
+						"649f0426da5833d0c325046b"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/token",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"token"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "refresh_token",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/verify/hxQNBwX9ZeeVbPuldXMU5DrHV-9WT75dq--PPZKQ74s=",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"verify",
+						"hxQNBwX9ZeeVbPuldXMU5DrHV-9WT75dq--PPZKQ74s="
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "password recovery by email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"georgi.georgiev.it@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/password-recovery/email",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"password-recovery",
+						"email"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "password recovery exchange",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"georgi.georgiev.it@gmail.com\",\n    \"code\": \"yH336ycn\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/password-recovery/exchange",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"password-recovery",
+						"exchange"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reset password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"georgi.georgiev.it@gmail.com\",\n    \"code\":\"vE0PZSW6coie_Q==\",\n    \"password\":\"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/password-recovery/reset",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"password-recovery",
+						"reset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"brand\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/roles",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/roles",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"basic\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/roles/649eed73167dfc019f6fe274",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"roles",
+						"649eed73167dfc019f6fe274"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create right",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"default\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/rights",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"rights"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get rights",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/rights",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"rights"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update right",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"default2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/rights/649eef808c4d4adf59f1c4cf",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"rights",
+						"649eef808c4d4adf59f1c4cf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "facebook callback",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "accessToken",
+							"value": "EAAGwPpiOmx8BAOe0OBrvd2X3KSgqZBG7AJZAhRiN2GOPN8M219Bfv6kVkiszXoNUZAErPZBVsKprYzntGYbhm4EGPoj7hvXgVuvqNnWO6ZCjhI0DOl0sZAeODERF82pbGZBYW0ZCjhCuAxPhcSowhgHjyumHNM0Y7G5UI3ukZClxZBRBC6aGkiK4zncaZCdzDCZCp3jOu5ZBXZAZA7GMRIwrUZA88WB0U70ZA0sCwevyYWZAPOhhK9TvaNabQT4bcU9dymwnRsx9MZD",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{identityAddress}}/identity/api/v1/facebook/callback",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						"identity",
+						"api",
+						"v1",
+						"facebook",
+						"callback"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "jwks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{identityAddress}}/.well-known/jwks.json",
+					"host": [
+						"{{identityAddress}}"
+					],
+					"path": [
+						".well-known",
+						"jwks.json"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -42,7 +42,7 @@ func (m *IdentityMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		userID, err := primitive.ObjectIDFromHex(userClaims.ID)
+		userID, err := primitive.ObjectIDFromHex(userClaims.Id)
 		if err != nil {
 			m.log.With(zap.Error(err)).Error("could not convert user id hex to primitive")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, blunder.Unauthorized())
@@ -74,7 +74,7 @@ func (m *IdentityMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("userId", userClaims.ID)
+		c.Set("userId", userClaims.Id)
 		c.Set("role", userClaims.Role)
 		c.Set("rights", userClaims.Rights)
 

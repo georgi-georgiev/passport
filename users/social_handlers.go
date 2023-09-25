@@ -41,15 +41,13 @@ func (h *UserHandlers) FacebookCallback(c *gin.Context) {
 
 	if existingUser != nil {
 
-		userClaims := h.userService.MapToUserClaims(existingUser)
-
-		token, exp, err := h.userService.IssueAccessToken(userClaims)
+		token, exp, err := h.userService.IssueAccessToken(existingUser)
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 			return
 		}
 
-		refreshToken, err := h.userService.IssueRefreshToken(userClaims)
+		refreshToken, err := h.userService.IssueRefreshToken(existingUser)
 		if err != nil {
 			h.blunder.GinAdd(c, err)
 			return
@@ -65,15 +63,13 @@ func (h *UserHandlers) FacebookCallback(c *gin.Context) {
 		return
 	}
 
-	userClaims := h.userService.MapToUserClaims(user)
-
-	token, exp, err := h.userService.IssueAccessToken(userClaims)
+	token, exp, err := h.userService.IssueAccessToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
 	}
 
-	refreshToken, err := h.userService.IssueRefreshToken(userClaims)
+	refreshToken, err := h.userService.IssueRefreshToken(user)
 	if err != nil {
 		h.blunder.GinAdd(c, err)
 		return
