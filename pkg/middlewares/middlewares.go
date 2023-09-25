@@ -75,7 +75,7 @@ func (m *IdentityMiddleware) Authenticate() gin.HandlerFunc {
 		}
 
 		c.Set("userId", userClaims.Id)
-		c.Set("role", userClaims.Role)
+		c.Set("roleId", userClaims.RoleId)
 		c.Set("rights", userClaims.Rights)
 
 		c.Next()

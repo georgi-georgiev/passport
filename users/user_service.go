@@ -281,7 +281,7 @@ func (s *UserService) ValidateToken(ctx context.Context, t string) (*passport.Us
 		return nil, err
 	}
 
-	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(t, &passport.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -291,8 +291,8 @@ func (s *UserService) ValidateToken(ctx context.Context, t string) (*passport.Us
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(passport.UserClaims); ok && token.Valid {
-		return &claims, nil
+	if claims, ok := token.Claims.(*passport.UserClaims); ok && token.Valid {
+		return claims, nil
 	}
 
 	return nil, nil
@@ -304,7 +304,7 @@ func (s *UserService) GetUserByToken(ctx context.Context, t string) (*User, erro
 		return nil, err
 	}
 
-	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(t, &passport.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -314,7 +314,7 @@ func (s *UserService) GetUserByToken(ctx context.Context, t string) (*User, erro
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(passport.UserClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*passport.UserClaims); ok && token.Valid {
 		userId, err := primitive.ObjectIDFromHex(claims.Id)
 		if err != nil {
 			return nil, err
@@ -570,8 +570,15 @@ func (s *UserService) MapToUserClaims(u *User) *passport.UserClaims {
 		rightsIds = append(rightsIds, right.Hex())
 	}
 
+	role, err := s.roleService.GetById(context.TODO(), u.Role)
+	if err != nil {
+		s.log.With(zap.Error(err)).Error("could not get role by id")
+		return nil
+	}
+
 	userClaims := &passport.UserClaims{
-		Role:   u.Role.Hex(),
+		RoleId: u.Role.Hex(),
+		Role:   role.Name,
 		Rights: rightsIds,
 		StandardClaims: jwt.StandardClaims{
 			Id:        u.ID.Hex(),
