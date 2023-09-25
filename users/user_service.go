@@ -30,12 +30,6 @@ type UserService struct {
 	log                *zap.Logger
 }
 
-type UserClaims struct {
-	ID     string
-	Role   string
-	Rights []string
-}
-
 func NewUserService(notificationFacade *facade.NotificationFacade, repository *UserRepository, roleService *permissions.RoleService, rightService *permissions.RightService, conf *passport.Config, log *zap.Logger) *UserService {
 	return &UserService{notificationFacade: notificationFacade, repository: repository, roleService: roleService, rightService: rightService, conf: conf, log: log}
 }
@@ -202,7 +196,7 @@ func (s *UserService) BasicAuthToken(ctx context.Context, username, password str
 	return tokenString, refreshTokenString, exp, nil
 }
 
-func (s *UserService) IssueAccessToken(userClaims *UserClaims) (string, int, error) {
+func (s *UserService) IssueAccessToken(userClaims *responses.UserClaims) (string, int, error) {
 
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
@@ -230,7 +224,7 @@ func (s *UserService) IssueAccessToken(userClaims *UserClaims) (string, int, err
 	return tokenString, exp, nil
 }
 
-func (s *UserService) IssueRefreshToken(userClaims *UserClaims) (string, error) {
+func (s *UserService) IssueRefreshToken(userClaims *responses.UserClaims) (string, error) {
 	keyData, err := os.ReadFile(s.conf.App.PrivKeyPath)
 	if err != nil {
 		return "", err
@@ -278,7 +272,7 @@ func (s *UserService) GetPublicKey() (*rsa.PublicKey, error) {
 	return jwt.ParseRSAPublicKeyFromPEM(keyData)
 }
 
-func (s *UserService) ValidateToken(ctx context.Context, t string) (*UserClaims, error) {
+func (s *UserService) ValidateToken(ctx context.Context, t string) (*responses.UserClaims, error) {
 	key, err := s.GetPublicKey()
 	if err != nil {
 		return nil, err
@@ -315,7 +309,7 @@ func (s *UserService) ValidateToken(ctx context.Context, t string) (*UserClaims,
 			r = append(r, right.(string))
 		}
 
-		return &UserClaims{
+		return &responses.UserClaims{
 			ID:     userId,
 			Role:   role,
 			Rights: r,
@@ -596,13 +590,13 @@ func (s *UserService) MapToUserResponse(ctx context.Context, u *User) (*response
 	}, nil
 }
 
-func (s *UserService) MapToUserClaims(u *User) *UserClaims {
+func (s *UserService) MapToUserClaims(u *User) *responses.UserClaims {
 	rightsIds := make([]string, 0)
 	for _, right := range u.Rights {
 		rightsIds = append(rightsIds, right.Hex())
 	}
 
-	userClaims := &UserClaims{
+	userClaims := &responses.UserClaims{
 		ID:     u.ID.Hex(),
 		Role:   u.Role.Hex(),
 		Rights: rightsIds,

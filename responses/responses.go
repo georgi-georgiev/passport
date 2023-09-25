@@ -52,3 +52,9 @@ type JSONWebKey struct {
 	N   *big.Int `json:"n"`
 	E   int      `json:"e"`
 }
+
+type UserClaims struct {
+	ID     string
+	Role   string
+	Rights []string
+}
